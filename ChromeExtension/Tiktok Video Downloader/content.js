@@ -116,7 +116,6 @@ function getVideoPageUrl(video, card) {
 }
 
 async function downloadCurrentVideo(button, videoPageUrl, authorId) {
-  const originalText = button.textContent;
   button.disabled = true;
   button.textContent = '...';
 
@@ -138,13 +137,10 @@ async function downloadCurrentVideo(button, videoPageUrl, authorId) {
     link.click();
     setTimeout(() => URL.revokeObjectURL(downloadUrl), 60_000);
 
-    button.textContent = 'Xong';
-    setTimeout(() => {
-      button.textContent = originalText;
-      button.disabled = false;
-    }, 2_000);
+    setDownloadButtonIcon(button);
+    button.disabled = false;
   } catch {
-    button.textContent = 'Lỗi';
+    setDownloadButtonIcon(button);
     button.disabled = false;
   }
 }
@@ -243,9 +239,10 @@ function injectDownloadButtons() {
     const button = document.createElement('button');
     button.className = 'tiktok-card-download-button';
     button.type = 'button';
-    button.textContent = 'Tải';
-    button.title = 'Tải video này';
     button.dataset.pageType = pageType;
+    setDownloadButtonIcon(button);
+    button.title = 'Tải video này';
+    button.setAttribute('aria-label', 'Tải video này');
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -254,8 +251,7 @@ function injectDownloadButtons() {
       if (videoPageUrl) {
         downloadCurrentVideo(button, videoPageUrl, authorId);
       } else {
-        button.textContent = 'Lỗi';
-        setTimeout(() => { button.textContent = 'Tải'; }, 2_000);
+        setDownloadButtonIcon(button);
       }
     });
 
@@ -265,6 +261,17 @@ function injectDownloadButtons() {
       buttonHost.append(button);
     }
   });
+}
+
+function setDownloadButtonIcon(button) {
+  const icon = document.createElement('img');
+  const iconName = button.dataset.pageType === 'video'
+    ? 'icon_download_trang.png'
+    : 'icon_download_den.png';
+  icon.src = chrome.runtime.getURL(iconName);
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
+  button.replaceChildren(icon);
 }
 
 function downloadVideo(videoUrl) {
@@ -291,8 +298,8 @@ buttonStyle.textContent = `
     padding: 8px 10px;
     border: 0;
     border-radius: 6px;
-    color: #fff;
-    background: #f04b35;
+    color: #000;
+    background: #fff;
     box-shadow: 0 4px 14px rgba(0, 0, 0, .24);
     cursor: pointer;
     font: 700 12px Arial, sans-serif;
@@ -302,12 +309,39 @@ buttonStyle.textContent = `
     align-self: center;
     margin-top: 8px;
   }
+  .tiktok-card-download-button[data-page-type="home"],
+  .tiktok-card-download-button[data-page-type="user"] {
+    min-width: 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    color: #000;
+    background: #fff;
+    font-size: 18px;
+  }
+  .tiktok-card-download-button img {
+    width: 18px;
+    height: 18px;
+    display: block;
+    object-fit: contain;
+  }
   .tiktok-card-download-button[data-page-type="video"] {
     position: static;
     flex: 0 0 auto;
     margin-left: 8px;
+    color: #000;
+    background: #fff;
   }
-  .tiktok-card-download-button:hover { background: #cf3828; }
+  .tiktok-card-download-button[data-page-type="video"]:hover {
+    background: #f2f2f2;
+  }
+  .tiktok-card-download-button[data-page-type="home"]:hover,
+  .tiktok-card-download-button[data-page-type="user"]:hover {
+    background: #f2f2f2;
+  }
+  .tiktok-card-download-button:hover { background: #f2f2f2; }
   .tiktok-card-download-button:disabled { opacity: .7; cursor: wait; }
 `;
 document.documentElement.append(buttonStyle);

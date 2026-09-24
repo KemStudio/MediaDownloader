@@ -7,6 +7,7 @@ const { URL } = require('url');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const port = Number(process.env.PORT || 8787);
+const ip = process.env.IP || '127.0.0.1';
 const wingetYtDlp = process.env.LOCALAPPDATA
   ? path.join(process.env.LOCALAPPDATA, 'Microsoft', 'WinGet', 'Packages', 'yt-dlp.yt-dlp_Microsoft.Winget.Source_8wekyb3d8bbwe', 'yt-dlp.exe')
   : null;
@@ -125,8 +126,8 @@ function runDownloader(videoPageUrl, outputTemplate) {
   });
 }
 
-server.listen(port, '127.0.0.1');
-console.log(`Server is listening on http://127.0.0.1:${port}`);
+server.listen(port, ip);
+console.log(`Server is listening on http://${ip}:${port}`);
 
 let isShuttingDown = false;
 function shutdown(signal) {
