@@ -5,9 +5,12 @@ function findVideoSource() {
 
 function getPageType() {
   const pathname = location.pathname.replace(/\/$/, '');
-  if (/^\/video\/\d+$/.test(pathname) || /\/video\/\d+$/.test(pathname)) return 'video';
+  if (pathname === '') return 'home';
+  if (/^\/@[^/]+\/video\/\d+$/.test(pathname) || /^\/video\/\d+$/.test(pathname)) {
+    return 'video';
+  }
   if (/^\/@[^/]+$/.test(pathname)) return 'user';
-  return 'home';
+  return 'other';
 }
 
 function getVideoFilename(videoPageUrl, authorId) {
@@ -163,18 +166,63 @@ function findVideoCard(video) {
   return video.parentElement;
 }
 
+function findVideoAuthorAvatar(video, card) {
+  const cardAvatar = card.querySelector('a[data-e2e="video-author-avatar"]');
+  if (cardAvatar) return cardAvatar;
+
+  let node = video;
+  for (let level = 0; node && level < 20; level += 1) {
+    const avatar = node.matches?.('a[data-e2e="video-author-avatar"]')
+      ? node
+      : node.querySelector?.('a[data-e2e="video-author-avatar"]');
+    if (avatar) return avatar;
+    node = node.parentElement;
+  }
+
+  return null;
+}
+
+function getDownloadButtonTarget(video, card, pageType) {
+  if (pageType === 'video') {
+    return { container: card };
+  }
+
+  if (pageType === 'home') {
+    const avatar = findVideoAuthorAvatar(video, card);
+    if (avatar?.parentElement) return { container: avatar.parentElement, before: avatar };
+  }
+
+  return { container: card };
+}
+
 function injectDownloadButtons() {
   document.querySelectorAll('video').forEach((video) => {
     const card = findVideoCard(video);
-    if (!card || card.querySelector(':scope > .tiktok-card-download-button')) return;
+    if (!card) return;
 
-    if (getComputedStyle(card).position === 'static') card.style.position = 'relative';
+    const pageType = getPageType();
+    const target = getDownloadButtonTarget(video, card, pageType);
+    if (!target) return;
+    const buttonHost = target.container || target;
+    const existingButton = pageType === 'video'
+      ? document.querySelector('.tiktok-card-download-button[data-page-type="video"]')
+      : buttonHost.querySelector(':scope > .tiktok-card-download-button');
+    if (existingButton) {
+      if (target.before && existingButton !== target.before && !buttonHost.contains(existingButton)) {
+        buttonHost.insertBefore(existingButton, target.before);
+      }
+      return;
+    }
+
+    if ((pageType === 'user' || pageType === 'video') && getComputedStyle(card).position === 'static') {
+      card.style.position = 'relative';
+    }
     const button = document.createElement('button');
     button.className = 'tiktok-card-download-button';
     button.type = 'button';
     button.textContent = 'Tải';
     button.title = 'Tải video này';
-    button.dataset.pageType = getPageType();
+    button.dataset.pageType = pageType;
     button.addEventListener('click', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -188,7 +236,11 @@ function injectDownloadButtons() {
       }
     });
 
-    card.append(button);
+    if (target.before) {
+      target.container.insertBefore(button, target.before);
+    } else {
+      buttonHost.append(button);
+    }
   });
 }
 
