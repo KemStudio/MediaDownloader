@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "TikTok Video Downloader",
+  "version": "1.0.0",
+  "description": "Lưu link video TikTok hiện tại và tải video khi trang cung cấp URL trực tiếp.",
+  "permissions": ["activeTab", "scripting", "downloads", "clipboardWrite"],
+  "host_permissions": [
+    "https://www.tiktok.com/*",
+    "https://*.tiktok.com/*",
+    "https://*.tiktokcdn.com/*",
+    "https://*.ibytedtos.com/*",
+    "https://*.byteoversea.com/*",
+    "http://127.0.0.1:8787/*"
+  ],
+  "action": {
+    "default_title": "TikTok Video Downloader"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.tiktok.com/*", "https://*.tiktok.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

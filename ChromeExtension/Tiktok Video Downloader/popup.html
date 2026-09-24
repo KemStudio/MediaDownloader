@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tải TikTok</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="brand">
+        <div class="brand-mark" aria-hidden="true">♪</div>
+        <div>
+          <p class="eyebrow">QUICK SAVE</p>
+          <h1>TikTok Downloader</h1>
+        </div>
+      </header>
+      <section class="hero" aria-labelledby="hero-title">
+        <p class="hero-kicker">VIDEO ĐANG MỞ</p>
+        <h2 id="hero-title">Lưu video trong vài giây.</h2>
+        <p class="hero-copy">Dán link TikTok hoặc lấy link từ tab hiện tại để bắt đầu.</p>
+      </section>
+      <form id="download-form" class="download-form">
+        <label for="video-url">Link video TikTok</label>
+        <div class="input-wrap">
+          <input id="video-url" name="video-url" type="url" placeholder="https://www.tiktok.com/@..." autocomplete="off" required />
+          <button id="paste-button" class="icon-button" type="button" title="Dán từ clipboard" aria-label="Dán từ clipboard">↘</button>
+        </div>
+        <button class="primary-button" type="submit">Chuẩn bị tải <span aria-hidden="true">→</span></button>
+      </form>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <p class="note">Chỉ tải nội dung bạn có quyền sử dụng.</p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
