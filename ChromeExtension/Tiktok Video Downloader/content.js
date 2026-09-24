@@ -182,12 +182,33 @@ function findVideoAuthorAvatar(video, card) {
   return null;
 }
 
+function findSectionActionBarContainer(video, card) {
+  const selector = '[class*="SectionActionBarContainer"]';
+  const cardContainer = card.matches?.(selector) ? card : card.querySelector(selector);
+  if (cardContainer) return cardContainer;
+
+  let node = video;
+  for (let level = 0; node && level < 20; level += 1) {
+    if (node.matches?.(selector)) return node;
+    const container = node.querySelector?.(selector);
+    if (container) return container;
+    node = node.parentElement;
+  }
+
+  return null;
+}
+
 function getDownloadButtonTarget(video, card, pageType) {
   if (pageType === 'video') {
+    const actionBar = findSectionActionBarContainer(video, card);
+    if (actionBar) return { container: actionBar };
     return { container: card };
   }
 
   if (pageType === 'home') {
+    const actionBar = findSectionActionBarContainer(video, card);
+    if (actionBar) return { container: actionBar };
+
     const avatar = findVideoAuthorAvatar(video, card);
     if (avatar?.parentElement) return { container: avatar.parentElement, before: avatar };
   }
@@ -206,10 +227,12 @@ function injectDownloadButtons() {
     const buttonHost = target.container || target;
     const existingButton = pageType === 'video'
       ? document.querySelector('.tiktok-card-download-button[data-page-type="video"]')
-      : buttonHost.querySelector(':scope > .tiktok-card-download-button');
+      : buttonHost.querySelector('.tiktok-card-download-button');
     if (existingButton) {
       if (target.before && existingButton !== target.before && !buttonHost.contains(existingButton)) {
         buttonHost.insertBefore(existingButton, target.before);
+      } else if ((pageType === 'home' || pageType === 'video') && existingButton.parentElement !== buttonHost) {
+        buttonHost.append(existingButton);
       }
       return;
     }
@@ -273,6 +296,16 @@ buttonStyle.textContent = `
     box-shadow: 0 4px 14px rgba(0, 0, 0, .24);
     cursor: pointer;
     font: 700 12px Arial, sans-serif;
+  }
+  .tiktok-card-download-button[data-page-type="home"] {
+    position: static;
+    align-self: center;
+    margin-top: 8px;
+  }
+  .tiktok-card-download-button[data-page-type="video"] {
+    position: static;
+    flex: 0 0 auto;
+    margin-left: 8px;
   }
   .tiktok-card-download-button:hover { background: #cf3828; }
   .tiktok-card-download-button:disabled { opacity: .7; cursor: wait; }
