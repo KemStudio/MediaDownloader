@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TikTok Video Downloader",
   "version": "1.0.0",
-  "description": "Lưu link video TikTok hiện tại và tải video khi trang cung cấp URL trực tiếp.",
+  "description": "Lưu video và ảnh TikTok đang mở.",
   "permissions": ["activeTab", "scripting", "downloads"],
   "host_permissions": [
     "https://www.tiktok.com/*",
